@@ -1,19 +1,22 @@
 (ns playground.git)
 
 (defn git [name]
-  {:name name
-   :head nil
-   :last-commit-id -1})
+  (let [master-branch {:name "master"
+                       :commit nil}]
+    {:name name
+     :head master-branch
+     :last-commit-id -1}))
 
 (defn commit [repo message]
   (let
     [commit-id (inc (:last-commit-id repo))
      this-commit {:id commit-id
                   :message message
-                  :parent (:head repo)}]
+                  :parent (:commit (:head repo))}]
     {:name (:name repo)
      :last-commit-id commit-id
-     :head this-commit}))
+     :head {:name (:name (:head repo))
+            :commit this-commit}}))
 
 (defn inner-log [a-commit]
   (let [parent (:parent a-commit)]
@@ -21,7 +24,7 @@
       (conj (inner-log parent) a-commit)
       (list a-commit))))
 
-(defn log [a-commit] (inner-log (:head repo)))
+(defn log [repo] (inner-log (:commit (:head repo))))
 
 ;; Poor-man's testing
 
